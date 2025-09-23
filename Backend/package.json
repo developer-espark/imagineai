@@ -9,7 +9,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "nodemon src/server.ts",
     "sequelize:migrate": "npx sequelize db:migrate",
-    "build": "rimraf dist && swc src -d dist --source-maps --copy-files",
+    "build": "rimraf dist && swc src -d dist --source-maps --copy-files && npm run build:tsc",
     "build:tsc": "tsc && tsc-alias"
   },
   "author": "",
@@ -28,6 +28,7 @@
     "sequelize": "^6.37.7",
     "sequelize-typescript": "^2.1.6",
     "ts-node": "^10.9.2",
+    "tsc-alias": "^1.8.16",
     "typescript": "^5.9.2",
     "winston": "^3.17.0",
     "winston-daily-rotate-file": "^5.0.0"

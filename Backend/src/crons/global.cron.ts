@@ -2,7 +2,6 @@ import { WeatherStatsAttributes } from '@/interfaces/weather_stats.interface';
 import WeatherStats from '@/models/weather_stats.model';
 import { parse } from '@/utils/common.util';
 import axios from 'axios';
-import moment from 'moment';
 import cron from 'node-cron';
 import { Op } from 'sequelize';
 
