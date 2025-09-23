@@ -1,31 +1,93 @@
-import AuthRepo from '@/repository/auth.repository';
+import WeatherStats from '@/models/weather_stats.model';
+import WeatherStatsRepo from '@/repository/weather_stats.respository';
 import { catchAsync } from '@/utils/catchAsync';
 
 export const typeDef = `#graphql
-  type User {
+  type WeatherStats {
     id: ID!
-    name: String!
-    email: String!
-    mobile_no: String!
+    external_id: String!
+    place: String!
+    mag: Float
+    time: String!
+    updated: String!
+    tz: Int
+    url: String!
+    detail: String
+    felt: Int
+    cdi: Float
+    mmi: Float
+    alert: String
+    status: String
+    tsunami: Int!
+    sig: Int
+    net: String
+    code: String
+    sources: String
+    types: String
+    nst: Int
+    dmin: Float
+    rms: Float
+    gap: Float
+    magType: String
+    type: String
+    title: String!
+    geometry_type: String!
+    geometry_coordinates: [Float!]!
+    created_at: String
+    updated_at: String
   }
 
   type Query {
-    users: [User!]!
+    weatherStats: [WeatherStats!]!
   }
 
   type Mutation {
-    register(name: String!, email: String!, password: String!,mobile_no: String!): User!
+    addWeatherStat(
+      external_id: String!
+      place: String!
+      mag: Float
+      time: String!
+      updated: String!
+      tz: Int
+      url: String!
+      detail: String
+      felt: Int
+      cdi: Float
+      mmi: Float
+      alert: String
+      status: String
+      tsunami: Int!
+      sig: Int
+      net: String
+      code: String
+      sources: String
+      types: String
+      nst: Int
+      dmin: Float
+      rms: Float
+      gap: Float
+      magType: String
+      type: String
+      title: String!
+      geometry_type: String!
+      geometry_coordinates: [Float!]!
+    ): WeatherStats!
   }
 `;
-const authRepo = new AuthRepo();
+
+const weatherStatsRepo = new WeatherStatsRepo();
 
 export const resolvers = {
 	Query: {
-		users: catchAsync(async () => authRepo.list()),
+		weatherStats: catchAsync(async (_: any, args: any) => weatherStatsRepo.list()),
 	},
 	Mutation: {
-		register: catchAsync(async (_: any, args: any) => authRepo.register(args)),
-	},
+    addWeatherStat: catchAsync(async (_: any, args: any) => {
+      const weatherStats = await WeatherStats.create(args);
+      return weatherStats;
+    }),
+  },
+
 };
 
 module.exports = {
