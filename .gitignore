@@ -1,0 +1,4 @@
+# Frontend files
+Frontend/node_modules
+Frontend/dist
+Frontend/.env
