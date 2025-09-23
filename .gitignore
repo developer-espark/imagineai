@@ -2,3 +2,11 @@
 Frontend/node_modules
 Frontend/dist
 Frontend/.env
+
+Backend/node_modules
+Backend/.env
+Backend/dist
+Backend/log
+Backend/logs
+Backend/*.log
+Backend/npm-debug.log*

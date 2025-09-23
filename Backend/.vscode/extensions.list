@@ -1,0 +1,9 @@
+code --install-extension streetsidesoftware.code-spell-checker
+code --install-extension dbaeumer.vscode-eslint
+code --install-extension eamodio.gitlens
+code --install-extension donjayamanne.githistory
+code --install-extension esbenp.prettier-vscode
+code --install-extension rvest.vs-code-prettier-eslint
+code --install-extension sonarsource.sonarlint-vscode
+code --install-extension Meezilla.json
+code --install-extension christian-kohler.npm-intellisense
