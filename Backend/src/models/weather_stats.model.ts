@@ -3,9 +3,9 @@ import { Column, CreatedAt, DataType, Default, Model, Table, UpdatedAt } from 's
 
 @Table({
 	timestamps: true,
-	paranoid: true,
 	tableName: 'weather_stats',
 })
+
 export default class WeatherStats extends Model<WeatherStatsAttributes> implements WeatherStatsAttributes {
 	@Default(DataType.UUIDV4)
 	@Column({
@@ -30,6 +30,7 @@ export default class WeatherStats extends Model<WeatherStatsAttributes> implemen
 	@Column({
 		type: DataType.FLOAT,
 		allowNull: true,
+		defaultValue: 0,
 	})
 	mag: number;
 
@@ -48,6 +49,7 @@ export default class WeatherStats extends Model<WeatherStatsAttributes> implemen
 	@Column({
 		allowNull: true,
 		type: DataType.INTEGER,
+		defaultValue: 0,
 	})
 	tz: number;
 
@@ -66,18 +68,21 @@ export default class WeatherStats extends Model<WeatherStatsAttributes> implemen
 	@Column({
 		allowNull: true,
 		type: DataType.INTEGER,
+		defaultValue: 0,
 	})
 	felt: number;
 
 	@Column({
 		allowNull: true,
 		type: DataType.FLOAT,
+		defaultValue: 0,
 	})
 	cdi: number;
 
 	@Column({
 		allowNull: true,
 		type: DataType.FLOAT,
+		defaultValue: 0,
 	})
 	mmi: number;
 
@@ -96,12 +101,14 @@ export default class WeatherStats extends Model<WeatherStatsAttributes> implemen
 	@Column({
 		allowNull: false,
 		type: DataType.INTEGER,
+		defaultValue: 0,
 	})
 	tsunami: number;
 
 	@Column({
 		allowNull: true,
 		type: DataType.INTEGER,
+		defaultValue: 0,
 	})
 	sig: number;
 
@@ -132,24 +139,28 @@ export default class WeatherStats extends Model<WeatherStatsAttributes> implemen
 	@Column({
 		allowNull: true,
 		type: DataType.INTEGER,
+		defaultValue: 0,
 	})
 	nst: number;
 
 	@Column({
 		allowNull: true,
 		type: DataType.FLOAT,
+		defaultValue: 0,
 	})
 	dmin: number;
 
 	@Column({
 		allowNull: true,
 		type: DataType.FLOAT,
+		defaultValue: 0,
 	})
 	rms: number;
 
 	@Column({
 		allowNull: true,
 		type: DataType.FLOAT,
+		defaultValue: 0,
 	})
 	gap: number;
 
