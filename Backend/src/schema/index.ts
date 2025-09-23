@@ -1,4 +1,3 @@
-import AuthRepo from '@/repository/auth.repository';
 import { catchAsync } from '@/utils/catchAsync';
 
 export const typeDef = `#graphql
@@ -17,14 +16,13 @@ export const typeDef = `#graphql
     register(name: String!, email: String!, password: String!,mobile_no: String!): User!
   }
 `;
-const authRepo = new AuthRepo();
 
 export const resolvers = {
 	Query: {
-		users: catchAsync(async () => authRepo.list()),
+		users: catchAsync(async () => console.log('first')),
 	},
 	Mutation: {
-		register: catchAsync(async (_: any, args: any) => authRepo.register(args)),
+		register: catchAsync(async (_: any, args: any) => console.log('first')),
 	},
 };
 
