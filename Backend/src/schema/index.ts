@@ -37,8 +37,21 @@ export const typeDef = `#graphql
     updated_at: String
   }
 
+  type getDataForQuakesChart {
+    interval: String!
+    count: Int!
+  }
+
+  type getCounts {
+    total_count: Int!
+    max_mag: Float!
+    max_mag_place: String!
+  }
+
   type Query {
     weatherStats: [WeatherStats!]!
+    getDataForQuakesChart: [getDataForQuakesChart!]!
+    getCounts: getCounts!
   }
 
   type Mutation {
@@ -79,15 +92,16 @@ const weatherStatsRepo = new WeatherStatsRepo();
 
 export const resolvers = {
 	Query: {
-		weatherStats: catchAsync(async (_: any, args: any) => weatherStatsRepo.list()),
+		weatherStats: catchAsync(async (_: any, args: any) => await weatherStatsRepo.list()),
+		getDataForQuakesChart: catchAsync(async (_: any, args: any) => await weatherStatsRepo.getDataForQuakesChart()),
+		getCounts: catchAsync(async (_: any, args: any) => await weatherStatsRepo.getCounts()),
 	},
 	Mutation: {
-    addWeatherStat: catchAsync(async (_: any, args: any) => {
-      const weatherStats = await WeatherStats.create(args);
-      return weatherStats;
-    }),
-  },
-
+		addWeatherStat: catchAsync(async (_: any, args: any) => {
+			const weatherStats = await WeatherStats.create(args);
+			return weatherStats;
+		}),
+	},
 };
 
 module.exports = {
