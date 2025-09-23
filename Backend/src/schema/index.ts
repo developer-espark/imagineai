@@ -1,5 +1,4 @@
 import { executeSQLWithSequelize, generateAnswer, generateSQLQuery } from '@/helper';
-import WeatherStats from '@/models/weather_stats.model';
 import WeatherStatsRepo from '@/repository/weather_stats.respository';
 import { catchAsync } from '@/utils/catchAsync';
 
@@ -60,7 +59,7 @@ export const resolvers = {
 			const sqlQuery = await generateSQLQuery(args.question);
 			const sqlResult = await executeSQLWithSequelize(sqlQuery);
 			const answer = await generateAnswer(args.question, sqlResult);
-			return { answer };
+			return answer;
 		}),
 	},
 };

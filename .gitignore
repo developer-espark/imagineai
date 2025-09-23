@@ -10,3 +10,5 @@ Backend/log
 Backend/logs
 Backend/*.log
 Backend/npm-debug.log*
+
+.env
