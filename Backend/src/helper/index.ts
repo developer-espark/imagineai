@@ -6,8 +6,8 @@ export async function generateSQLQuery(question: string) {
 	const prompt = `
 You are an AI that converts natural language questions into safe SQL queries for PostgreSQL.
 
-The table 'earthquakes' has the following columns:
-id (text), place (text), magnitude (float), time (timestamp), updated (timestamp), tz (int), url (text), detail (text), felt (int), cdi (float), mmi (float), alert (text), status (text), tsunami (int), sig (int), net (text), code (text), ids (text), sources (text), types (text), nst (int), dmin (float), rms (float), gap (float), magType (text), type (text), title (text), latitude (float), longitude (float), depth (float).
+The table 'weather_stats' has the following columns:
+external_id (text), place (text), magnitude (float), time (timestamp), updated (timestamp), tz (int), url (text), detail (text), felt (int), cdi (float), mmi (float), alert (text), status (text), tsunami (int), sig (int), net (text), code (text), ids (text), sources (text), types (text), nst (int), dmin (float), rms (float), gap (float), magType (text), type (text), title (text), latitude (float), longitude (float), depth (float).
 
 Constraints:
 - Do NOT select any data outside this table or timeframe.
@@ -20,31 +20,31 @@ Constraints:
 ### Few-shot examples:
 
 User Question: Has a tsunami occurred at 16 km SSE of McCloud, CA?  
-SQL Query: SELECT * FROM earthquakes WHERE place LIKE '16 km SSE of McCloud, CA' AND time >= NOW() - INTERVAL '1 hour';
+SQL Query: SELECT * FROM weather_stats WHERE place LIKE '16 km SSE of McCloud, CA' AND time >= NOW() - INTERVAL '1 hour';
 
-User Question: What was the average magnitude of earthquakes in Alaska?  
-SQL Query: SELECT AVG(magnitude) AS average_magnitude FROM earthquakes WHERE place LIKE '%Alaska%' AND time >= NOW() - INTERVAL '1 hour';
+User Question: What was the average magnitude of weather_stats in Alaska?  
+SQL Query: SELECT AVG(magnitude) AS average_magnitude FROM weather_stats WHERE place LIKE '%Alaska%' AND time >= NOW() - INTERVAL '1 hour';
 
 User Question: List all events in California with magnitude greater than 2.0.  
-SQL Query: SELECT id, place, magnitude, time, depth FROM earthquakes WHERE place LIKE '%California%' AND magnitude > 2 AND time >= NOW() - INTERVAL '1 hour';
+SQL Query: SELECT external_id, place, magnitude, time, depth FROM weather_stats WHERE place LIKE '%California%' AND magnitude > 2 AND time >= NOW() - INTERVAL '1 hour';
 
-User Question: How many earthquakes were reported by at least 10 people?  
-SQL Query: SELECT COUNT(*) AS reported_count FROM earthquakes WHERE felt >= 10 AND time >= NOW() - INTERVAL '1 hour';
+User Question: How many weather_stats were reported by at least 10 people?  
+SQL Query: SELECT COUNT(*) AS reported_count FROM weather_stats WHERE felt >= 10 AND time >= NOW() - INTERVAL '1 hour';
 
-User Question: Get the maximum depth of earthquakes in Mexico.  
-SQL Query: SELECT MAX(depth) AS max_depth FROM earthquakes WHERE place LIKE '%Mexico%' AND time >= NOW() - INTERVAL '1 hour';
+User Question: Get the maximum depth of weather_stats in Mexico.  
+SQL Query: SELECT MAX(depth) AS max_depth FROM weather_stats WHERE place LIKE '%Mexico%' AND time >= NOW() - INTERVAL '1 hour';
 
-User Question: Find the sum of significance of all earthquakes in Japan.  
-SQL Query: SELECT SUM(sig) AS total_significance FROM earthquakes WHERE place LIKE '%Japan%' AND time >= NOW() - INTERVAL '1 hour';
+User Question: Find the sum of significance of all weather_stats in Japan.  
+SQL Query: SELECT SUM(sig) AS total_significance FROM weather_stats WHERE place LIKE '%Japan%' AND time >= NOW() - INTERVAL '1 hour';
 
-User Question: Show the ID, place, and magnitude of the last 5 earthquakes in Puerto Rico.  
-SQL Query: SELECT id, place, magnitude, time FROM earthquakes WHERE place LIKE '%Puerto Rico%' AND time >= NOW() - INTERVAL '1 hour' ORDER BY time DESC LIMIT 5;
+User Question: Show the ID, place, and magnitude of the last 5 weather_stats in Puerto Rico.  
+SQL Query: SELECT external_id, place, magnitude, time FROM weather_stats WHERE place LIKE '%Puerto Rico%' AND time >= NOW() - INTERVAL '1 hour' ORDER BY time DESC LIMIT 5;
 
-User Question: Retrieve the minimum and maximum depth of earthquakes in California.  
-SQL Query: SELECT MIN(depth) AS min_depth, MAX(depth) AS max_depth FROM earthquakes WHERE place LIKE '%California%' AND time >= NOW() - INTERVAL '1 hour';
+User Question: Retrieve the minimum and maximum depth of weather_stats in California.  
+SQL Query: SELECT MIN(depth) AS min_depth, MAX(depth) AS max_depth FROM weather_stats WHERE place LIKE '%California%' AND time >= NOW() - INTERVAL '1 hour';
 
 User Question: Give me the ID, place, and whether a tsunami occurred for all events near Anza, CA.  
-SQL Query: SELECT id, place, tsunami FROM earthquakes WHERE place LIKE '%Anza, CA%' AND time >= NOW() - INTERVAL '1 hour';
+SQL Query: SELECT external_id, place, tsunami FROM weather_stats WHERE place LIKE '%Anza, CA%' AND time >= NOW() - INTERVAL '1 hour';
 
 
 ---
@@ -98,7 +98,7 @@ ${JSON.stringify(sqlResult)}
 User Question:
 ${question}
 
-Answer (include earthquake ID if reporting any specific earthquake):
+Answer (include earthquake external_id if reporting any specific earthquake):
 `;
 	console.log('Prompt being sent to LLM:\n', prompt);
 
