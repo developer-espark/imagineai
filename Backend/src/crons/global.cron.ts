@@ -62,19 +62,15 @@ const storeWeatherStatsData = async () => {
 
 	const newData = [];
 
-	data.forEach(async (item) => {
+	for (let index = 0; index < data.length; index++) {
+		const item = data[index];
 		const isExist = getWeatherStatsData.some((weather_stat) => weather_stat.external_id === item.external_id);
 		if (isExist) {
-			await WeatherStats.update(
-				{
-					...item,
-				},
-				{ where: { external_id: item.external_id } },
-			);
+			await WeatherStats.update({ ...item }, { where: { external_id: item.external_id } });
 		} else {
 			newData.push(item);
 		}
-	});
+	}
 
 	const resp = await WeatherStats.bulkCreate(newData);
 };

@@ -1,3 +1,4 @@
+import { executeSQLWithSequelize, generateAnswer, generateSQLQuery } from '@/helper';
 import WeatherStats from '@/models/weather_stats.model';
 import WeatherStatsRepo from '@/repository/weather_stats.respository';
 import { catchAsync } from '@/utils/catchAsync';
@@ -55,36 +56,9 @@ export const typeDef = `#graphql
   }
 
   type Mutation {
-    addWeatherStat(
-      external_id: String!
-      place: String!
-      mag: Float
-      time: String!
-      updated: String!
-      tz: Int
-      url: String!
-      detail: String
-      felt: Int
-      cdi: Float
-      mmi: Float
-      alert: String
-      status: String
-      tsunami: Int!
-      sig: Int
-      net: String
-      code: String
-      sources: String
-      types: String
-      nst: Int
-      dmin: Float
-      rms: Float
-      gap: Float
-      magType: String
-      type: String
-      title: String!
-      geometry_type: String!
-      geometry_coordinates: [Float!]!
-    ): WeatherStats!
+    askQuestion(
+      question: String!
+    ): String!
   }
 `;
 
@@ -97,9 +71,11 @@ export const resolvers = {
 		getCounts: catchAsync(async (_: any, args: any) => await weatherStatsRepo.getCounts()),
 	},
 	Mutation: {
-		addWeatherStat: catchAsync(async (_: any, args: any) => {
-			const weatherStats = await WeatherStats.create(args);
-			return weatherStats;
+		askQuestion: catchAsync(async (_: any, args: any) => {
+			const sqlQuery = await generateSQLQuery(args.question);
+			const sqlResult = await executeSQLWithSequelize(sqlQuery);
+			const answer = await generateAnswer(args.question, sqlResult);
+			return { answer };
 		}),
 	},
 };
