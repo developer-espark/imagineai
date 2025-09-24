@@ -1,7 +1,7 @@
 import { executeSQLWithSequelize, generateAnswer, generateSQLQuery } from '@/helper';
 import WeatherStatsRepo from '@/repository/weather_stats.respository';
 import { catchAsync } from '@/utils/catchAsync';
-
+import { graph } from '@/helper/workflow';
 export const typeDef = `#graphql
   type WeatherStats {
     id: ID!
@@ -71,10 +71,9 @@ export const resolvers = {
 	},
 	Mutation: {
 		askQuestion: catchAsync(async (_: any, args: any) => {
-			const sqlQuery = await generateSQLQuery(args.question);
-			const sqlResult = await executeSQLWithSequelize(sqlQuery);
-			const answer = await generateAnswer(args.question, sqlResult);
-			return answer;
+      const initialState = { question: args.question };
+      const result = await graph.invoke(initialState);
+			return result.answer;
 		}),
 	},
 };

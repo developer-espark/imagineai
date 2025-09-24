@@ -1,59 +1,24 @@
 import axios from 'axios';
 import db from '@/models';
+import { getSQLPrompt, generateSQLResponse } from './prompts';
+import WeatherStats from "@/models/weather_stats.model";
 
+
+// Get column definitions from Sequelize model
+export function getTableSchemaFromModel(model: typeof WeatherStats) {
+  const attributes = model.getAttributes();
+  const columns = Object.entries(attributes).map(([name, attr]) => {
+    const type = (attr.type as any).key || "UNKNOWN";
+    return `${name} (${type})`;
+  });
+
+  return `Table '${model.tableName}' columns:\n${columns.join(", ")}`;
+}
+const schemaStr = getTableSchemaFromModel(WeatherStats);
 // --- Helper: LLM generates SQL query ---
-export async function generateSQLQuery(question: string) {
-	const prompt = `
-You are an AI that converts natural language questions into safe SQL queries for PostgreSQL.
+export async function generateSQLQuery(state: any) {
 
-The table 'weather_stats' has the following columns:
-external_id (text), place (text), magnitude (float), time (timestamp), updated (timestamp), tz (int), url (text), detail (text), felt (int), cdi (float), mmi (float), alert (text), status (text), tsunami (int), sig (int), net (text), code (text), ids (text), sources (text), types (text), nst (int), dmin (float), rms (float), gap (float), magType (text), type (text), title (text), latitude (float), longitude (float), depth (float).
-
-Constraints:
-- Do NOT select any data outside this table or timeframe.
-- Only return records from the last 1 hour only.
-- Do NOT try to answer with logic; only generate SQL.
-- Do NOT add filters for tsunami, felt, magnitude, etc. unless explicitly requested by the question.
-- Do NOT include markdown, explanations, or comments.
-- Return only a valid SQL SELECT statement.
-
-### Few-shot examples:
-
-User Question: Has a tsunami occurred at 16 km SSE of McCloud, CA?  
-SQL Query: SELECT * FROM weather_stats WHERE place LIKE '16 km SSE of McCloud, CA' AND time >= NOW() - INTERVAL '1 hour';
-
-User Question: What was the average magnitude of weather_stats in Alaska?  
-SQL Query: SELECT AVG(magnitude) AS average_magnitude FROM weather_stats WHERE place LIKE '%Alaska%' AND time >= NOW() - INTERVAL '1 hour';
-
-User Question: List all events in California with magnitude greater than 2.0.  
-SQL Query: SELECT external_id, place, magnitude, time, depth FROM weather_stats WHERE place LIKE '%California%' AND magnitude > 2 AND time >= NOW() - INTERVAL '1 hour';
-
-User Question: How many weather_stats were reported by at least 10 people?  
-SQL Query: SELECT COUNT(*) AS reported_count FROM weather_stats WHERE felt >= 10 AND time >= NOW() - INTERVAL '1 hour';
-
-User Question: Get the maximum depth of weather_stats in Mexico.  
-SQL Query: SELECT MAX(depth) AS max_depth FROM weather_stats WHERE place LIKE '%Mexico%' AND time >= NOW() - INTERVAL '1 hour';
-
-User Question: Find the sum of significance of all weather_stats in Japan.  
-SQL Query: SELECT SUM(sig) AS total_significance FROM weather_stats WHERE place LIKE '%Japan%' AND time >= NOW() - INTERVAL '1 hour';
-
-User Question: Show the ID, place, and magnitude of the last 5 weather_stats in Puerto Rico.  
-SQL Query: SELECT external_id, place, magnitude, time FROM weather_stats WHERE place LIKE '%Puerto Rico%' AND time >= NOW() - INTERVAL '1 hour' ORDER BY time DESC LIMIT 5;
-
-User Question: Retrieve the minimum and maximum depth of weather_stats in California.  
-SQL Query: SELECT MIN(depth) AS min_depth, MAX(depth) AS max_depth FROM weather_stats WHERE place LIKE '%California%' AND time >= NOW() - INTERVAL '1 hour';
-
-User Question: Give me the ID, place, and whether a tsunami occurred for all events near Anza, CA.  
-SQL Query: SELECT external_id, place, tsunami FROM weather_stats WHERE place LIKE '%Anza, CA%' AND time >= NOW() - INTERVAL '1 hour';
-
-
----
-
-Now, generate the SQL query for the following question:
-
-Question: ${question}  
-SQL Query:
-`;
+	const prompt = getSQLPrompt(state.question,schemaStr);
 	const response = await axios.post(
 		`${process.env.AZURE_OPENAI_ENDPOINT}/openai/deployments/${process.env.AZURE_OPENAI_DEPLOYMENT}/chat/completions?api-version=${process.env.AZURE_OPENAI_API_VERSION}`,
 		{
@@ -72,34 +37,22 @@ SQL Query:
 	let sql = response.data.choices[0].message.content;
 	sql = sql.replace(/```/g, '').replace(/sql/g, '').trim();
 	console.log('Generated SQL:', sql);
-	return sql;
+  	return { ...state, sql };
 }
 
-export async function executeSQLWithSequelize(sql: string) {
+export async function executeSQLWithSequelize(state: any) {
+	const { sql } = state;
 	const [results] = await db.query(sql, { raw: true });
-	return results;
+	console.log('SQL Results:', results);
+  	return { ...state, sqlResult: results };
 }
 // --- LLM generates natural language answer ---
-export async function generateAnswer(question: string, sqlResult: any[]) {
-	if (!sqlResult.length) return 'I could not find any records matching your request.';
+export async function generateAnswer(state: any) {
+	const { question, sql, sqlResult } = state;
 
-	const prompt = `
-You are an AI assistant that ONLY answers questions based on the earthquake data provided below.
-Each earthquake has a timestamp in ISO format.
-Do NOT make up information.
-Do NOT provide any source or reference that you using to generate answer like "in the given information","data provided shows" etc...
-Answer naturally, in a clear and concise way, summarizing the relevant information. 
-Do not include raw field names or numeric labels. 
-If there is no relevant data TO ANSWER, respond with "No data found for the given question."
+	// if (!sqlResult.length) return 'I could not find any records matching your request.';
 
-Earthquake Data:
-${JSON.stringify(sqlResult)}
-
-User Question:
-${question}
-
-Answer (include earthquake external_id if reporting any specific earthquake):
-`;
+	const prompt = generateSQLResponse(question, sql, sqlResult,schemaStr);
 	console.log('Prompt being sent to LLM:\n', prompt);
 
 	const response = await axios.post(
@@ -117,5 +70,8 @@ Answer (include earthquake external_id if reporting any specific earthquake):
 		},
 	);
 
-	return response.data.choices[0].message.content.trim();
+	const answer = response.data.choices[0].message.content.trim();
+	console.log('Generated Answer:', answer);
+	return { ...state, answer };
+
 }
